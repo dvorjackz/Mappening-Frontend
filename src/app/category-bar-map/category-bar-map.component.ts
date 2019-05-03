@@ -1,5 +1,6 @@
 import { Component, OnInit, HostListener, Input } from '@angular/core';
 import { CategoryService } from '../category.service';
+import { DateService } from '../shared/date.service'
 import { EventService } from '../event.service';
 import { FeatureCollection, GeoJson } from '../map';
 import { NgClass } from '@angular/common';

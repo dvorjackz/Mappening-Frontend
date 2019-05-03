@@ -216,11 +216,6 @@ export class EventService {
 
   // DAY RELATED FUNCTIONS //
 
-  // Determine whether current date is today
-  isToday(): boolean {
-    return this._dateService.isToday(this._currDate);
-  }
-
   // Retrieve selected day
   getSelectedDay() {
     return this._currDate;
@@ -279,7 +274,7 @@ export class EventService {
   // Retrieve events by date
   private getEventsByDate(date: Date): string {
     const d = date.getDate();
-    const monthName = this._dateService.getMonthName(date);
+    const monthName = moment(date).format('MMM');
     const y = date.getFullYear();
     let dateURL = `${this.baseUrl}/search?date=${d}%20${monthName}%20${y}`;
     return dateURL;

@@ -3,7 +3,7 @@ import { EventService } from '../event.service';
 import { DateService } from '../shared/date.service';
 import { CalendarService } from '../calendar.service';
 import { Router, RouterLinkActive, ActivatedRoute } from '@angular/router';
-
+import * as moment from 'moment';
 
 @Component({
     selector: 'app-date-selector',
@@ -39,7 +39,7 @@ export class DateSelectorComponent implements OnInit {
 
     private dateToString(date: Date): string {
         let day = date.getDate();
-        let month = this._dateService.getMonthName(date);
+        let month = moment(date).format('MMM');
         let description = '';
         let today = new Date();
         let tomorrow = new Date();
