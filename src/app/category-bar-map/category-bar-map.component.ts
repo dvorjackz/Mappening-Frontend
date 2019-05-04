@@ -20,7 +20,7 @@ export class CategoryBarMapComponent implements OnInit {
   public showDropdown = false;
   private wasInside = false;
 
-  constructor(private _categService: CategoryService, private _eventService: EventService) {}
+  constructor(private _categService: CategoryService, private _eventService: EventService, private _dateService: DateService) {}
 
   ngOnInit() {
     this._eventService.dayEvents$.subscribe(eventCollection => {

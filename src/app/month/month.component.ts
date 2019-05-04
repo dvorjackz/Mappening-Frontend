@@ -67,7 +67,7 @@ export class MonthComponent implements OnInit {
       this.selectedYear = moment().year();
       this.fillEventsByDay();
       this.ngZone.run( () => {
-        this.showCalendar(this._calendarService.getViewDate());
+        this.showCalendar(this._eventService.getSelectedDay());
       });
       let calendarDays = this._calendarService.days;
       let first = moment([calendarDays[0].year, calendarDays[0].month, calendarDays[0].dayOfMonth]).toDate();
@@ -93,11 +93,9 @@ export class MonthComponent implements OnInit {
     this.fillEventsByDay();
     if (this._eventService.getSelectedDay() != null) {
       this.showCalendar(this._eventService.getSelectedDay());
-      this._calendarService.setViewDate(this._eventService.getSelectedDay());
     }
     else{
       this.showCalendar(new Date());
-      this._calendarService.setViewDate(new Date(), true);
     }
 
     let calendarDays = this._calendarService.days;
@@ -156,19 +154,16 @@ export class MonthComponent implements OnInit {
     let newMonth: Moment = this.currentMonth.clone().add(delta, 'months');
     // if selected day is in month, that is first option
     if (this._eventService.getSelectedDay() && newMonth.isSame(moment(this._eventService.getSelectedDay()), 'month')) {
-      this._calendarService.setViewDate(this._eventService.getSelectedDay());
       this._eventService.updateDayEvents(this._eventService.getSelectedDay());
       this.showCalendar(this._eventService.getSelectedDay());
     }
     // if current month, make selected day today
     else if (newMonth.isSame(moment(), 'month')) {
-      this._calendarService.setViewDate(new Date());
       this._eventService.updateDayEvents(new Date());
       this.showCalendar( new Date());
     }
     // make selected day the 1st of the month
     else {
-      this._calendarService.setViewDate(newMonth.startOf('month').toDate());
       this._eventService.updateDayEvents(newMonth.startOf('month').toDate());
       this.showCalendar(newMonth.startOf('month').toDate());
     }

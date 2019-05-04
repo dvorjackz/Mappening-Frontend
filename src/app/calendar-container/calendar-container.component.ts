@@ -56,7 +56,7 @@ export class CalendarContainerComponent implements OnInit {
   }
 
   ngOnInit() {
-    this._calendarService.viewDateChange.subscribe( function(set) { this.viewDateChange(set); }.bind(this));
+    this._eventService.currDate$.subscribe( function(set) { this.viewDateChange(set); }.bind(this));
     this.enumerateWeek();
   }
 
@@ -78,7 +78,7 @@ export class CalendarContainerComponent implements OnInit {
     //iterate backwards through zeroWeeks array to find the first positive week
     for(var i = this.zeroWeeks.length-1; i>=0; i--){
       //determine week count
-      weekCount = Math.floor(moment(this._calendarService.getViewDate()).diff(this.zeroWeeks[i],'days') / 7);
+      weekCount = Math.floor(moment(this._eventService.getSelectedDay()).diff(this.zeroWeeks[i],'days') / 7);
       //handle zero week
       if(weekCount>=0){ if(i%3 != 0){ weekCount++; } i = -1; }
     }

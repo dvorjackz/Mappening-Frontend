@@ -68,7 +68,7 @@ export class WeekComponent implements OnInit {
       this.filteredEvents = weekEventCollection.features;
       this.fillEventsByDay();
       this.ngZone.run( () => {
-        this.showCalendar(this._calendarService.getViewDate());
+        this.showCalendar(this._eventService.getSelectedDay());
         let calendarDays = this._calendarService.days;
         let first = moment([calendarDays[0].year, calendarDays[0].month, calendarDays[0].dayOfMonth]).toDate();
         let last = moment([calendarDays[calendarDays.length-1].year, calendarDays[calendarDays.length-1].month, calendarDays[calendarDays.length-1].dayOfMonth]).toDate();
@@ -98,7 +98,6 @@ export class WeekComponent implements OnInit {
       //on startup
       this.selectedMonth = moment(this._eventService.getSelectedDay()).month();
       this.selectedYear = moment(this._eventService.getSelectedDay()).year();
-      this._calendarService.setViewDate(this._eventService.getSelectedDay(), true);
       //update view
       this.updateWeekView();
     }
@@ -106,7 +105,6 @@ export class WeekComponent implements OnInit {
       //on startup
       this.selectedMonth = moment().month();
       this.selectedYear = moment().year();
-      this._calendarService.setViewDate(new Date(), true);
       //update view
       this.updateWeekView();
     }
@@ -131,7 +129,7 @@ export class WeekComponent implements OnInit {
   //update the week view
   updateWeekView(){
     //update month events (subscribed to by ngOnInit)
-    this._eventService.updateWeekEvents(this._calendarService.getViewDate());
+    this._eventService.updateWeekEvents(this._eventService.getSelectedDay());
     //set scroll bar to show view of rogughly 8am-10pm
     document.getElementById("scrollable").scrollTop = 200;
   }
@@ -192,7 +190,6 @@ export class WeekComponent implements OnInit {
     this.selectedYear = newWeek.year();
     // if selected day is in month, that is first option
     if (this._eventService.getSelectedDay() && newWeek.isSame(moment(this._eventService.getSelectedDay()), 'week')) {
-      this._calendarService.setViewDate(this._eventService.getSelectedDay());
       this._eventService.updateDayEvents(this._eventService.getSelectedDay());
       this.updateWeekView();
     }
@@ -200,7 +197,6 @@ export class WeekComponent implements OnInit {
     else if (newWeek.isSame(moment(), 'week')) {
       //update view date
       // this.viewDate = new Date();
-      this._calendarService.setViewDate(new Date());
       this._eventService.updateDayEvents(new Date());
       //update view
       this.updateWeekView();
@@ -209,7 +205,6 @@ export class WeekComponent implements OnInit {
     else {
       //update view date
       // this.viewDate = newWeek.startOf('week').toDate();
-      this._calendarService.setViewDate(newWeek.startOf('week').toDate());
       this._eventService.updateDayEvents(newWeek.startOf('week').toDate());
       //update view
       this.updateWeekView();

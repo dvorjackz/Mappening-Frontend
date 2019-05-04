@@ -1,5 +1,4 @@
 import { Injectable, Output } from '@angular/core';
-import * as moment from 'moment';
 import { Moment } from 'moment';
 import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
@@ -7,40 +6,40 @@ import { EventEmitter } from '@angular/core';
 import { Router, RouterLinkActive, ActivatedRoute } from '@angular/router';
 import { EventService } from './event.service';
 import { GeoJson } from './map';
+import * as moment from 'moment';
 
+// Calendar Day interface
 interface CalendarDay {
+  // day of month
   dayOfMonth: number;
-  inCurrentMonth: boolean;
+  // month as number
   month: number;
+  // year as number
   year: number;
+  // events on day
   events: GeoJson[];
+  // is day selected
   selected: boolean;
+  // is day in the current month
+  inCurrentMonth: boolean;
 }
 
 @Injectable({providedIn: 'root'})
 export class CalendarService {
 
+  // span of dates being shown on screen
   dateSpanSource: Subject <any>;
   dateSpan$;
-  viewSource: Subject <any>;
-  view$;
 
   constructor(private router: Router, private _eventService: EventService) {
     this.dateSpanSource = new Subject < any > ();
     this.dateSpan$ = this.dateSpanSource.asObservable();
-    this.viewSource = new Subject < any > ();
-    this.view$ = this.viewSource.asObservable();
-    this._eventService.currDate$.subscribe( date => {
-        this.viewDate = date;
-        this.viewDateChange.emit(date);
-    });
   }
 
   // date change
   delta : Number = 0;
 
   // day variables
-  viewDate : Date;
   selectedDay: CalendarDay;
   days: CalendarDay[] = [];
 
@@ -48,7 +47,6 @@ export class CalendarService {
 
   @Output() change: EventEmitter<Number> = new EventEmitter();
   @Output() selectedDayChange: EventEmitter<CalendarDay> = new EventEmitter();
-  @Output() viewDateChange: EventEmitter<Date> = new EventEmitter();
 
   changeDateSpan(delta : Number) {
     let span = {};
@@ -78,19 +76,6 @@ export class CalendarService {
     return "/calendar";
   }
 
-  getViewDate() {
-    return this.viewDate;
-  }
-
-  setViewDate(set : Date, fromNgOnInit : boolean = false) {
-    if (this.viewDate == undefined && fromNgOnInit)
-      this.viewDate = set;
-    if (!fromNgOnInit)
-      this.viewDate = set;
-    this.viewDateChange.emit(set);
-    this._eventService.updateDayEvents(set);
-  }
-
   getSelectedDay() {
     return this.selectedDay;
   }
@@ -117,19 +102,19 @@ export class CalendarService {
 
   isMonthView() {
     if(this.router.url.startsWith("/calendar/month"))
-      this.viewSource.next('month');
+      this.storedView = 'month';
     return this.router.url.startsWith("/calendar/month");
   }
 
   isWeekView() {
     if(this.router.url.startsWith("/calendar/week"))
-      this.viewSource.next('week');
+      this.storedView = 'week';
     return this.router.url.startsWith("/calendar/week");
   }
 
   isMapView() {
     if(this.router.url.startsWith("/map"))
-      this.viewSource.next('map');
+      this.storedView = 'map';
     return this.router.url.startsWith("/map");
   }
 
