@@ -1,8 +1,8 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { Router } from '@angular/router';
-import { CategoryService } from '../category.service';
-import { CalendarService } from '../calendar.service';
-import { EventService } from '../event.service';
+import { CategoryService } from '../services/category.service';
+import { CalendarService } from '../services/calendar.service';
+import { EventService } from '../services/event.service';
 
 @Component({
     selector: 'app-navbar',
@@ -16,8 +16,8 @@ export class NavbarComponent implements OnInit {
     isMapSelected: boolean;
 
     constructor(private _eventService: EventService, private _categService: CategoryService, private _calendarService: CalendarService, private _router: Router) {
-      this._eventService.currDate$.subscribe( view => {
-        if(view == 'map'){
+      this._eventService.currDate$.subscribe( day => {
+        if(!this._calendarService.isCalendarView()){
           this.isMapSelected = true;
         } else {
           this.isMapSelected = false;
@@ -61,7 +61,7 @@ export class NavbarComponent implements OnInit {
     }
 
     toggleViews(): void {
-        if (!this._calendarService.isMapView()) {
+        if (this._calendarService.isCalendarView()) {
             this.emitChangeView('map');
             this.isMapSelected = true;
             this._router.navigateByUrl('/map(sidebar:list)');

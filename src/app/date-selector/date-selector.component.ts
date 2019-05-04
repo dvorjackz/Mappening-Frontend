@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { EventService } from '../event.service';
-import { DateService } from '../shared/date.service';
-import { CalendarService } from '../calendar.service';
+import { EventService } from '../services/event.service';
+import { DateService } from '../services/date.service';
+import { CalendarService } from '../services/calendar.service';
 import { Router, RouterLinkActive, ActivatedRoute } from '@angular/router';
 import * as moment from 'moment';
 

@@ -1,12 +1,11 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Subject } from 'rxjs/Subject';
-import { FeatureCollection, GeoJson } from './map';
+import { FeatureCollection, GeoJson } from '../map';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { DateService } from './shared/date.service';
-import { LocationService } from './shared/location.service';
+import { DateService } from './date.service';
+import { LocationService } from './location.service';
 import { CategoryService } from './category.service';
-import { CategoryList } from './category';
 import { Router, RouterLinkActive, ActivatedRoute } from '@angular/router';
 import * as moment from 'moment';
 

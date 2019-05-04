@@ -3,11 +3,11 @@ import { Router, NavigationEnd } from '@angular/router';
 import * as mapboxgl from 'mapbox-gl';
 import { GeoJson, FeatureCollection } from '../map';
 import { environment } from '../../environments/environment';
-import { DateService } from '../shared/date.service';
-import { EventService } from '../event.service';
-import { CategoryService } from '../category.service';
-import { LocationService } from '../shared/location.service';
-import { CalendarService } from '../calendar.service';
+import { DateService } from '../services/date.service';
+import { EventService } from '../services/event.service';
+import { CategoryService } from '../services/category.service';
+import { LocationService } from '../services/location.service';
+import { CalendarService } from '../services/calendar.service';
 
 @Component({
     selector: 'app-map-box',
@@ -137,7 +137,7 @@ export class MapBoxComponent implements OnInit {
     // add extra controls
     this.addControls();
 
-    this._calendarService.isMapView();
+    this._calendarService.isCalendarView();
   }
 
   addEventLayer(data): void {

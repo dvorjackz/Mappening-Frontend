@@ -1,9 +1,9 @@
 import { Component, OnInit, HostListener, Input } from '@angular/core';
-import { CategoryService } from '../category.service';
-import { EventService } from '../event.service';
+import { CategoryService } from '../services/category.service';
+import { EventService } from '../services/event.service';
 import { FeatureCollection, GeoJson } from '../map';
 import { NgClass } from '@angular/common';
-import { CalendarService } from '../calendar.service';
+import { CalendarService } from '../services/calendar.service';
 import * as moment from 'moment';
 
 @Component({

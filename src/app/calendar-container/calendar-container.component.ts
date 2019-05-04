@@ -3,8 +3,8 @@ import { Router, RouterLinkActive, ActivatedRoute } from '@angular/router';
 import { ContentChild } from '@angular/core';
 import { MonthComponent } from '../month/month.component';
 import { WeekComponent } from '../week/week.component';
-import { CalendarService } from '../calendar.service';
-import { EventService } from '../event.service';
+import { CalendarService } from '../services/calendar.service';
+import { EventService } from '../services/event.service';
 import * as moment from 'moment';
 import { Moment } from 'moment';
 

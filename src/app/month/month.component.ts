@@ -1,10 +1,10 @@
 import { Component, OnInit, NgZone } from '@angular/core';
 import * as moment from 'moment';
 import { Moment } from 'moment';
-import { EventService } from '../event.service';
+import { EventService } from '../services/event.service';
 import { GeoJson } from '../map';
 import { Router, NavigationEnd } from '@angular/router';
-import { CalendarService } from '../calendar.service';
+import { CalendarService } from '../services/calendar.service';
 
 interface CalendarDay {
   dayOfMonth: number;

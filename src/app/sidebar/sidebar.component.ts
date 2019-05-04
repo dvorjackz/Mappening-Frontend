@@ -1,12 +1,12 @@
 import { Component, OnInit, Input, Output, HostBinding, EventEmitter } from '@angular/core';
-import { DateService } from '../shared/date.service';
-import { EventService } from '../event.service';
+import { DateService } from '../services/date.service';
+import { EventService } from '../services/event.service';
 import { AfterViewInit, ViewChildren, ElementRef, QueryList } from '@angular/core';
 import { FeatureCollection, GeoJson } from '../map';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import { Observable } from 'rxjs/Observable';
 import { Router, RouterLinkActive, ActivatedRoute } from '@angular/router';
-import { CategoryService } from '../category.service';
+import { CategoryService } from '../services/category.service';
 
 @Component({
     selector: 'app-sidebar',
