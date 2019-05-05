@@ -2,7 +2,7 @@ import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { Router } from '@angular/router';
 import { CategoryService } from '../services/category.service';
 import { CalendarService } from '../services/calendar.service';
-import { EventService } from '../services/event.service';
+import { EventService } from '../services/display.service';
 
 @Component({
     selector: 'app-navbar',
@@ -55,7 +55,7 @@ export class NavbarComponent implements OnInit {
       this.isFilterCollapsed = true;
     }
 
-    toggleFilterCollapse(): void {
+    toggleFilterButtonCollapse(): void {
       this.isFilterCollapsed = !this.isFilterCollapsed;
       this.isCollapsed = true;
     }

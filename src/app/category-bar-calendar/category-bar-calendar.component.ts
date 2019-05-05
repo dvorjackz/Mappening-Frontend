@@ -1,6 +1,6 @@
 import { Component, OnInit, HostListener, Input } from '@angular/core';
 import { CategoryService } from '../services/category.service';
-import { EventService } from '../services/event.service';
+import { EventService } from '../services/display.service';
 import { FeatureCollection, GeoJson } from '../map';
 import { NgClass } from '@angular/common';
 import { CalendarService } from '../services/calendar.service';
@@ -102,7 +102,7 @@ export class CategoryBarCalendarComponent implements OnInit {
   }
 
   filterClicked(filter: string): void {
-    this._eventService.toggleFilter(filter);
+    this._eventService.toggleFilterButton(filter);
   }
 
   categoryClicked(): void {
@@ -133,7 +133,7 @@ export class CategoryBarCalendarComponent implements OnInit {
   clearFilters(): void {
     for (let key in this.filterHash) {
       if (this.filterHash[key]) {
-        this._eventService.toggleFilter(key);
+        this._eventService.toggleFilterButton(key);
       }
     }
   }

@@ -4,7 +4,7 @@ import { ContentChild } from '@angular/core';
 import { MonthComponent } from '../month/month.component';
 import { WeekComponent } from '../week/week.component';
 import { CalendarService } from '../services/calendar.service';
-import { EventService } from '../services/event.service';
+import { EventService } from '../services/display.service';
 import * as moment from 'moment';
 import { Moment } from 'moment';
 

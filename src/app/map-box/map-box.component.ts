@@ -4,7 +4,7 @@ import * as mapboxgl from 'mapbox-gl';
 import { GeoJson, FeatureCollection } from '../map';
 import { environment } from '../../environments/environment';
 import { DateService } from '../services/date.service';
-import { EventService } from '../services/event.service';
+import { EventService } from '../services/display.service';
 import { CategoryService } from '../services/category.service';
 import { LocationService } from '../services/location.service';
 import { CalendarService } from '../services/calendar.service';

@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import { FeatureCollection, GeoJson } from '../map';
-import { EventService } from '../services/event.service';
+import { EventService } from '../services/display.service';
 import { DateService } from '../services/date.service';
 
 @Component({

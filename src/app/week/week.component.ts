@@ -2,7 +2,7 @@ import { Component, OnInit, Output, EventEmitter, NgZone } from '@angular/core';
 import * as moment from 'moment';
 import { Moment } from 'moment';
 import { Router, NavigationEnd } from '@angular/router';
-import { EventService } from '../services/event.service';
+import { EventService } from '../services/display.service';
 import { DateService } from '../services/date.service';
 import { GeoJson } from '../map';
 import { CalendarService } from '../services/calendar.service';

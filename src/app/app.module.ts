@@ -20,7 +20,7 @@ import { CollapseModule } from 'ngx-bootstrap/collapse';
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 import { ButtonsModule } from 'ngx-bootstrap/buttons';
 import { NavbarComponent } from './navbar/navbar.component';
-import { EventService } from './services/event.service';
+import { EventService } from './services/display.service';
 import { CalendarService } from './services/calendar.service';
 import { DateSelectorComponent } from './date-selector/date-selector.component';
 import { ServiceWorkerModule } from '@angular/service-worker';
