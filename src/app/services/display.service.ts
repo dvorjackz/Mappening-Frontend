@@ -1,25 +1,28 @@
 import { Injectable } from '@angular/core';
+import { EventEmitter, Output } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router, RouterLinkActive, ActivatedRoute } from '@angular/router';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Subject } from 'rxjs/Subject';
+import { Observable } from 'rxjs/Observable';
 import { FeatureCollection, GeoJson } from '../map';
 import { DateService } from './date.service';
 import { LocationService } from './location.service';
 import * as moment from 'moment';
 
 // Calendar Day interface
-interface CalendarDay {
+export interface CalendarDay {
   dayOfMonth: number;         // day of month for date
   month: number;              // month number for date
   year: number;               // year number for date
+  dayOfWeek: string;          // day of week as string
   events: GeoJson[];          // events on day
   selected: boolean;          // is day currently selected
   inCurrentMonth: boolean;    // is day in the current month
 }
 
 @Injectable()
-export class EventService {
+export class DisplayService {
 
   // DATE VARIABLES
   private _currentDate;               // holds the current selected day in Date format
@@ -54,8 +57,8 @@ export class EventService {
 
   // SOURCES
   private currentDateSource: BehaviorSubject <Date>;
-  private calendarDaysSource: BehaviorSubject <FeatureCollection>;
-  private selectedDaySource: BehaviorSubject <CalendarDay>;
+  private calendarDaysSource: Subject <any>;
+  private selectedDaySource: Subject <CalendarDay>;
   private dateSpanSource: Subject <any>;
   private monthEventsSource: BehaviorSubject <FeatureCollection>;
   private filteredMonthEventsSource: BehaviorSubject <FeatureCollection>;
@@ -122,8 +125,8 @@ export class EventService {
   constructor(private router: Router, private http: HttpClient, private _dateService: DateService, private _locationService: LocationService) {
     // Observable string sources - BehaviorSubjects have an intial state
     this.currentDateSource = new BehaviorSubject <Date> (new Date());
-    this.calendarDaysSource = new BehaviorSubject <FeatureCollection> (new FeatureCollection([]));
-    this.selectedDaySource = new BehaviorSubject <CalendarDay> ();
+    this.calendarDaysSource = new Subject <CalendarDay[]> ();
+    this.selectedDaySource = new Subject <CalendarDay> ();
     this.dateSpanSource = new Subject <any> ();
     this.monthEventsSource = new BehaviorSubject <FeatureCollection> (new FeatureCollection([]));
     this.filteredMonthEventsSource = new BehaviorSubject <FeatureCollection> (new FeatureCollection([]));
@@ -173,7 +176,7 @@ export class EventService {
     this.filteredDayEvents$.subscribe(filteredDayEvents => this._filteredDayEvents = filteredDayEvents);
     this.clickedEvent$.subscribe(clickedEventInfo => this._clickedEvent = clickedEventInfo);
     this.hoveredEvent$.subscribe(hoveredEventInfo => this._hoveredEvent = hoveredEventInfo);
-    this.expandedEvent$.subscribe(expandedEventInfo => this._expandedEvent = expandedEventInfo);
+    this.clickedEvent$.subscribe(expandedEventInfo => this._clickedEvent = expandedEventInfo);
     this.categHash$.subscribe(categHash => { this._categHash = categHash; this.applyAllFilters(); });
     this.buttonHash$.subscribe(filterHash => { this._buttonHash = filterHash; this.applyAllFilters(); });
     this.locationFilter$.subscribe(locationSearch => { this._locationFilter = locationSearch; this.applyAllFilters(); });
@@ -187,6 +190,22 @@ export class EventService {
     this.updateWeekEvents(new Date());
     // Initialize filters to defaults
     this.resetFilters();
+  }
+
+  // CHANGE DATE SPAN //
+
+  @Output() change: EventEmitter<Number> = new EventEmitter();
+  changeDateSpan(delta : Number) {
+    let span = {};
+    this.dateSpanSource.next(span);
+    this.change.emit(delta);
+    this._selectedDay = this._calendarDays[0];
+    if(delta == 0){
+      if(this.isWeekView())
+        this.storeView('month');
+      else
+        this.storeView('week');
+    }
   }
 
   // VIEW CHECKERS //
@@ -208,7 +227,6 @@ export class EventService {
   isMonthView() {
     if(this.router.url.startsWith("/calendar/month")){
       this._currentView = 'month';
-      this._lastCalendarView = 'month';
     }
     return this.router.url.startsWith("/calendar/month");
   }
@@ -217,7 +235,6 @@ export class EventService {
   isWeekView() {
     if(this.router.url.startsWith("/calendar/week")){
       this._currentView = 'week';
-      this._lastCalendarView = 'week';
     }
     return this.router.url.startsWith("/calendar/week");
   }
@@ -249,6 +266,11 @@ export class EventService {
     this.calendarDaysSource.next(calendarDays);
   }
 
+  // get the current CalendarDay's
+  getDays(){
+    return this._calendarDays;
+  }
+
   // EVENT GETTERS AND SETTERS //
 
   // Update the current hovered event
@@ -268,13 +290,6 @@ export class EventService {
     return this._clickedEvent;
   }
 
-  // Calls updateDayEvents for the current date + days
-  updateDateByDays(days: number) {
-    let newDate = this._selectedDay.date;
-    newDate.setDate(newDate.getDate() + days);
-    this.updateDayEvents(newDate);
-  }
-
   // advance selection to the next day
   increaseDay(days: number){
     let index = this._calendarDays.indexOf(this._selectedDay);
@@ -282,6 +297,9 @@ export class EventService {
     if(index < this._calendarDays.length && index > -1){
       this.setSelectedDay(this._calendarDays[index]);
     }
+    let newDate = this._selectedDay.date;
+    newDate.setDate(newDate.getDate() + days);
+    this.updateDayEvents(newDate);
   }
 
   // EVENT RETRIEVAL //
@@ -358,7 +376,7 @@ export class EventService {
     this.initCategories();
     this.resetFilterButtons();
     this.setTimeFilter(0,1439);
-    this.setLocationSearch("");
+    this.setLocationFilter("");
     this.setUniversalSearch("");
     let calendarDays = this._calendarDays;
     let first = moment([calendarDays[0].year,
@@ -371,7 +389,7 @@ export class EventService {
   }
 
   // set date hash
-  initDateFilter(first: Date, last: Date){
+  setDateFilter(first: Date, last: Date){
     let tempHash = [];
     tempHash.push(first);
     tempHash.push(last);
@@ -402,8 +420,8 @@ export class EventService {
   }
 
   // return location search
-  getLocationSearch(){
-    return this._locationSearch;
+  getLocationFilter(){
+    return this._locationFilter;
   }
 
   // set universal search
@@ -427,7 +445,7 @@ export class EventService {
   }
 
   // Toggle button
-  toggleFilterButtonButton(filter: string) {
+  toggleFilterButton(filter: string) {
     // if a filter is being applied via the filter buttons
     if (this._buttonHash[filter] != undefined) {
       // apply the current filter
@@ -644,15 +662,15 @@ export class EventService {
 
   private passesDateAndTime(event: GeoJson): boolean {
     let eventDate = moment(event.properties.start_time).toDate();
-    properDate = (eventDate >= moment(this._dateFilter[0]).toDate() && eventDate <= moment(this._dateFilter[1]).add('1','days').toDate());
+    let properDate = (eventDate >= moment(this._dateFilter[0]).toDate() && eventDate <= moment(this._dateFilter[1]).add('1','days').toDate());
     let eventTime = moment(event.properties.start_time);
     let minCount = eventTime.hour()*60 + eventTime.minutes();
-    properTime = (minCount >= this._timeFilter[0] && minCount <= this._timeFilter[1]);
+    let properTime = (minCount >= this._timeFilter[0] && minCount <= this._timeFilter[1]);
     return (properDate && properTime);
   }
 
   private passesLocation(event: GeoJson): boolean {
-    properLocation = false;
+    let properLocation = false;
     if(this._locationFilter != ""){
       let eventLocation = event.properties.place.name;
       if(eventLocation){
@@ -672,7 +690,7 @@ export class EventService {
   }
 
   private passesUniversalSearch(event: GeoJson): boolean {
-    properSearchTerm = false;
+    let properSearchTerm = false;
     if (this._universalSearch != ""){
       let eventName = event.properties.name;
       let targetWords = eventName.toLowerCase().split(" ");
@@ -686,6 +704,7 @@ export class EventService {
         }
       }
     }
+    return properSearchTerm;
   }
 
   // Apply categories and filters to day
@@ -694,15 +713,15 @@ export class EventService {
     let tempEvents = new FeatureCollection([]);
     // iterate through events
     for (let event of inputFeatures) {
-      let passesFilterButtons = this.passesFilterButtons();
-      let passesAllCategories = this.passesAllCategories();
+      let passesFilterButtons = this.passesFilterButtons(event);
+      let passesAllCategories = this.passesAllCategories(event);
       let passesDateAndTime = true;
       let passesLocation = true;
       let passesUniversalSearch = true;
       if(this.isCalendarView()){
-        let passesDateAndTime = this.passesDateAndTime();
-        let passesLocation = this.passesLocation();
-        let passesUniversalSearch = this.passesUniversalSearch();
+        let passesDateAndTime = this.passesDateAndTime(event);
+        let passesLocation = this.passesLocation(event);
+        let passesUniversalSearch = this.passesUniversalSearch(event);
       }
       // combine all filter checks
       if (passesFilterButtons && passesAllCategories && passesDateAndTime && passesLocation && passesUniversalSearch)
@@ -746,7 +765,7 @@ export class EventService {
     //iterate through popup event titles and unbold
     var popups = document.getElementsByClassName("popupEvent");
     for(var i = 0; i < popups.length; i++){
-      if(this._expandedEvent == undefined || (this._expandedEvent != null && popups.item(i).id != "popupEvent"+this._expandedEvent.id)){
+      if(this._clickedEvent == undefined || (this._clickedEvent != null && popups.item(i).id != "popupEvent"+this._clickedEvent.id)){
         (<any>popups.item(i)).style.fontWeight = "normal";
       }
     }
@@ -760,7 +779,7 @@ export class EventService {
     //iterate through backup popup event titles and unbold
     var bpopups = document.getElementsByClassName("backupPopupEvent");
     for(var i = 0; i < bpopups.length; i++){
-      if(this._expandedEvent == undefined || (this._expandedEvent != null && bpopups.item(i).id != "popupEvent"+this._expandedEvent.id)){
+      if(this._clickedEvent == undefined || (this._clickedEvent != null && bpopups.item(i).id != "popupEvent"+this._clickedEvent.id)){
         (<any>bpopups.item(i)).style.fontWeight = "normal";
       }
     }

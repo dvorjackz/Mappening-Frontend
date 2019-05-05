@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { EventService } from '../services/display.service';
+import { DisplayService } from '../services/display.service';
 
 @Component({
   selector: 'app-search-bar',
@@ -8,17 +8,17 @@ import { EventService } from '../services/display.service';
 })
 export class SearchBarComponent implements OnInit {
 
-  constructor(private _eventService: EventService) { }
+  constructor(private _displayService: DisplayService) { }
 
   ngOnInit() {
   }
 
   setUniversalFilter(){
     let uniInput = (<HTMLInputElement>document.getElementById('universal-search')).value;
-    this._eventService.setUniversalSearch(uniInput);
+    this._displayService.setUniversalSearch(uniInput);
   }
 
   getUni(){
-    return this._eventService.getUniversalSearch();
+    return this._displayService.getUniversalSearch();
   }
 }

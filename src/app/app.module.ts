@@ -13,15 +13,13 @@ import { SidebarComponent } from './sidebar/sidebar.component';
 import { EventDetailComponent } from './event-detail/event-detail.component';
 import { CategoryBarMapComponent } from './category-bar-map/category-bar-map.component';
 import { CategoryBarCalendarComponent } from './category-bar-calendar/category-bar-calendar.component';
-import { CategoryService } from './services/category.service';
 
 import { AngularFontAwesomeModule } from 'angular-font-awesome';
 import { CollapseModule } from 'ngx-bootstrap/collapse';
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 import { ButtonsModule } from 'ngx-bootstrap/buttons';
 import { NavbarComponent } from './navbar/navbar.component';
-import { EventService } from './services/display.service';
-import { CalendarService } from './services/calendar.service';
+import { DisplayService } from './services/display.service';
 import { DateSelectorComponent } from './date-selector/date-selector.component';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
@@ -74,8 +72,7 @@ const appRoutes: Routes = [
     RouterModule.forRoot(appRoutes, {useHash: true}),
   ],
   providers: [
-    CategoryService,
-    EventService,
+    DisplayService,
     { provide: RouteReuseStrategy, useClass: CustomReuseStrategy },
   ],
   bootstrap: [AppComponent]

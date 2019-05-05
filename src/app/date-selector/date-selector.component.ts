@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { EventService } from '../services/display.service';
+import { DisplayService } from '../services/display.service';
 import { DateService } from '../services/date.service';
-import { CalendarService } from '../services/calendar.service';
 import { Router, RouterLinkActive, ActivatedRoute } from '@angular/router';
 import * as moment from 'moment';
 
@@ -16,14 +15,13 @@ export class DateSelectorComponent implements OnInit {
     public showLeft: boolean;
     public showRight: boolean;
 
-    constructor(private router: Router, private _eventService: EventService, private _dateService: DateService, private _calendarService: CalendarService) { }
+    constructor(private router: Router, private _displayService: DisplayService, private _dateService: DateService) { }
 
     ngOnInit() {
-        this._eventService.currDate$.subscribe(date => {
+        this._displayService.currentDate$.subscribe(date => {
             this.dateString = this.dateToString(date);
             this.showLeft = this.showLeftArrow(date);
             this.showRight = this.showRightArrow(date);
-            this._calendarService.setSelectedDay(date);
         });
 
     }
@@ -55,9 +53,8 @@ export class DateSelectorComponent implements OnInit {
 
     public updateDate(days: number) {
         // 1 means advance one day, -1 means go back one day
-        this._calendarService.increaseDay(days);
-        this._eventService.updateDateByDays(days);
-        if(this.router.url.startsWith('/map')){
+        this._displayService.increaseDay(days);
+        if(this._displayService.isMapView()){
           document.getElementById("resetButton").click();
         }
     }

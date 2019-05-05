@@ -1,13 +1,13 @@
 import { TestBed, inject } from '@angular/core/testing';
-import { EventService } from './display.service';
+import { DisplayService } from './display.service';
 
-describe('EventService', () => {
+describe('DisplayService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [EventService]
+      providers: [DisplayService]
     });
   });
-  it('should be created', inject([EventService], (service: EventService) => {
+  it('should be created', inject([DisplayService], (service: DisplayService) => {
     expect(service).toBeTruthy();
   }));
 });
