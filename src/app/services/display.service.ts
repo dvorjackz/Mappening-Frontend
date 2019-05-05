@@ -49,7 +49,6 @@ export class DisplayService {
   private _dateFilter;                  // holds range of dates being applied as filter
   private _timeFilter;                  // holds range of times being applied as filter
   private _universalSearch;           // holds universal search string (only title now)
-  private _selectedCategory;          // holds the name of the last selected category
 
   // VIEW VARIABLES
   private _currentView;               // stores either 'month' 'week' or 'map'
@@ -74,12 +73,11 @@ export class DisplayService {
   private dateFilterSource: Subject <any>;
   private timeFilterSource: Subject <any>;
   private universalSearchSource: Subject <string>;
-  private selectedCategorySource: Subject <any>;
 
   // OBSERVABLES
   currentDate$; calendarDays$; selectedDay$; dateSpan$; clickedEvent$; hoveredEvent$;
   monthEvents$; filteredMonthEvents$; weekEvents$; filteredWeekEvents$; dayEvents$; filteredDayEvents$;
-  categHash$; buttonHash$; locationFilter$; dateFilter$; timeFilter$; universalSearch$; selectedCategory$;
+  categHash$; buttonHash$; locationFilter$; dateFilter$; timeFilter$; universalSearch$;
 
   // Filters in the same group should be mutually exclusive
   private _filterGroups = [
@@ -142,7 +140,6 @@ export class DisplayService {
     this.dateFilterSource = new Subject <any> ();
     this.timeFilterSource = new Subject <any> ();
     this.universalSearchSource = new Subject <string> ();
-    this.selectedCategorySource = new Subject <any> ();
     // Observable string streams
     this.currentDate$ = this.currentDateSource.asObservable();
     this.calendarDays$ = this.calendarDaysSource.asObservable();
@@ -162,7 +159,6 @@ export class DisplayService {
     this.dateFilter$ = this.dateFilterSource.asObservable();
     this.timeFilter$ = this.timeFilterSource.asObservable();
     this.universalSearch$ = this.universalSearchSource.asObservable();
-    this.selectedCategory$ = this.selectedCategorySource.asObservable();
     // Maintain a set of self-subscribed local values
     this.currentDate$.subscribe(date => this._currentDate = date);
     this.calendarDays$.subscribe(days => this._calendarDays = days);
@@ -183,7 +179,6 @@ export class DisplayService {
     this.dateFilter$.subscribe(dateHash => { this._dateFilter = dateHash; this.applyAllFilters(); });
     this.timeFilter$.subscribe(timeHash => { this._timeFilter = timeHash; this.applyAllFilters(); });
     this.universalSearch$.subscribe(universalSearch => { this._universalSearch = universalSearch; this.applyAllFilters(); })
-    this.selectedCategory$.subscribe(category => this._selectedCategory = category);
     // Populate event containers
     this.updateDayEvents(new Date());
     this.updateMonthEvents(new Date());
@@ -251,6 +246,10 @@ export class DisplayService {
 
   // DAY GETTERS AND SETTERS //
 
+  getCurrentDate() {
+    return this._currentDate;
+  }
+
   // retrieve selected day as CalendarDay
   getSelectedDay() {
     return this._selectedDay;
@@ -292,12 +291,14 @@ export class DisplayService {
 
   // advance selection to the next day
   increaseDay(days: number){
-    let index = this._calendarDays.indexOf(this._selectedDay);
-    index += days;
-    if(index < this._calendarDays.length && index > -1){
-      this.setSelectedDay(this._calendarDays[index]);
+    if(this.isCalendarView()){
+      let index = this._calendarDays.indexOf(this._selectedDay);
+      index += days;
+      if(index < this._calendarDays.length && index > -1){
+        this.setSelectedDay(this._calendarDays[index]);
+      }
     }
-    let newDate = this._selectedDay.date;
+    let newDate = this._currentDate;
     newDate.setDate(newDate.getDate() + days);
     this.updateDayEvents(newDate);
   }
@@ -320,8 +321,10 @@ export class DisplayService {
 
   // Retrieve events by date
   getEventsByDate(date: Date): string {
-    const monthName = moment(date.getDate()).format('MMM');
-    let dateURL = `${this.eventsUrl}/search?date=${date.getDate()}%20${monthName}%20${date.getFullYear()}`;
+    const d = date.getDate();
+    const monthName = moment(date).format('MMM');
+    const y = date.getFullYear();
+    let dateURL = `${this.eventsUrl}/search?date=${d}%20${monthName}%20${y}`;
     return dateURL;
   }
 
@@ -331,8 +334,9 @@ export class DisplayService {
   updateDayEvents(date: Date): void {
     this.currentDateSource.next(date);
     this.http.get <FeatureCollection> (this.getEventsByDate(date)).subscribe(events => {
+      console.log(events);
       this.dayEventsSource.next(events);
-      if(this.router.url.startsWith('/map')){
+      if(this.isMapView()){
         this.resetFilters();
         this.allCategories();
       }
@@ -379,13 +383,15 @@ export class DisplayService {
     this.setLocationFilter("");
     this.setUniversalSearch("");
     let calendarDays = this._calendarDays;
-    let first = moment([calendarDays[0].year,
-      calendarDays[0].month,
-      calendarDays[0].dayOfMonth]).toDate();
-    let last = moment([calendarDays[calendarDays.length-1].year,
-      calendarDays[calendarDays.length-1].month,
-      calendarDays[calendarDays.length-1].dayOfMonth]).toDate();
-    this.setDateFilter(first,last);
+    if(calendarDays){
+      let first = moment([calendarDays[0].year,
+        calendarDays[0].month,
+        calendarDays[0].dayOfMonth]).toDate();
+      let last = moment([calendarDays[calendarDays.length-1].year,
+        calendarDays[calendarDays.length-1].month,
+        calendarDays[calendarDays.length-1].dayOfMonth]).toDate();
+      this.setDateFilter(first,last);
+    }
   }
 
   // set date hash
@@ -434,16 +440,6 @@ export class DisplayService {
     return this._universalSearch;
   }
 
-  // set selected category
-  setSelectedCategory(category: string){
-    this.selectedCategorySource.next(category);
-  }
-
-  // return selected category
-  getSelectedCategory(){
-    return this._selectedCategory;
-  }
-
   // Toggle button
   toggleFilterButton(filter: string) {
     // if a filter is being applied via the filter buttons
@@ -467,7 +463,6 @@ export class DisplayService {
     if (this._categHash[category] != undefined) {
       if(this.isCalendarView()){
         this.resetCategories();
-        this._selectedCategory = category;
       }
       if(this.isMapView() && category == 'all'){
           if(this._categHash['all'].selected)
@@ -601,6 +596,7 @@ export class DisplayService {
         this._categHash[categ.toLowerCase()].selected = false;
       }
     }
+    this.categHashSource.next(this._categHash);
   }
 
   // reset all categories to be true
@@ -611,15 +607,18 @@ export class DisplayService {
         this._categHash[categ.toLowerCase()].selected = true;
       }
     }
+    this.categHashSource.next(this._categHash);
   }
 
   // FILTER APPLICATIONS //
 
   // Apply filters and categories together
   applyAllFilters() {
-    this.applyFiltersToSelection(this._weekEvents.features,this.filteredWeekEventsSource);
-    this.applyFiltersToSelection(this._monthEvents.features,this.filteredMonthEventsSource);
     this.applyFiltersToSelection(this._dayEvents.features,this.filteredDayEventsSource);
+    if(this.isCalendarView()){
+      this.applyFiltersToSelection(this._weekEvents.features,this.filteredWeekEventsSource);
+      this.applyFiltersToSelection(this._monthEvents.features,this.filteredMonthEventsSource);
+    }
   }
 
   private passesFilterButtons(event: GeoJson): boolean {

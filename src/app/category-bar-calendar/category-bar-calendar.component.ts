@@ -14,7 +14,6 @@ export class CategoryBarCalendarComponent implements OnInit {
   @Input() showToggleButton: boolean;
   private categHash = {};
   private filterHash = {};
-  public selectedCategory = 'all';
   public showDropdown = false;
   private wasInside = false;
 
@@ -26,9 +25,6 @@ export class CategoryBarCalendarComponent implements OnInit {
     });
     this._displayService.buttonHash$.subscribe(filterHash => {
       this.filterHash = filterHash;
-    });
-    this._displayService.selectedCategory$.subscribe(category => {
-      this.selectedCategory = category;
     });
   }
 
@@ -113,7 +109,6 @@ export class CategoryBarCalendarComponent implements OnInit {
     if(this.categHash){
       this.categHash["all"].selected = true;
     }
-    this.selectedCategory = "all";
   }
 
   clearFilters(): void {

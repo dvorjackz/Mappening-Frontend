@@ -17,8 +17,9 @@ export class CategoryBarMapComponent implements OnInit {
   public selectedCategory = 'all categories';
   public showDropdown = false;
   private wasInside = false;
+  private events;
 
-  constructor(private _displayService: DisplayService) {}
+  constructor(private _displayService: DisplayService, private _dateService: DateService) {}
 
   ngOnInit() {
     this._displayService.categHash$.subscribe(categHash => {
@@ -26,6 +27,9 @@ export class CategoryBarMapComponent implements OnInit {
     });
     this._displayService.buttonHash$.subscribe(filterHash => {
       this.filterHash = filterHash;
+    });
+    this._displayService.dayEvents$.subscribe(events => {
+      this.events = events;
     });
   }
 
@@ -42,11 +46,7 @@ export class CategoryBarMapComponent implements OnInit {
   }
 
   clearCategories(): void {
-    for (let key in this.categHash) {
-      if (this.categHash[key].selected) {
-        this._displayService.toggleCategory(key);
-      }
-    }
+    this._displayService.allCategories();
   }
 
   clearFilters(): void {

@@ -16,7 +16,7 @@ import { Moment } from 'moment';
 
 export class CalendarContainerComponent implements OnInit {
 
-  public viewDate: Date = new Date();
+  public viewDate: string;
   currentPath = '';
 
   @ContentChild(MonthComponent)
@@ -46,8 +46,12 @@ export class CalendarContainerComponent implements OnInit {
   }
 
   ngOnInit() {
-    this._displayService.currentDate$.subscribe( function(set) { this.viewDate = set }.bind(this));
+    this._displayService.change.subscribe( function(set) { this.viewDateChange(set); }.bind(this));
     this.enumerateWeek();
+  }
+
+  viewDateChange(set : Date) {
+    this.viewDate = set.toLocaleDateString("en-US", {month: 'long', year: 'numeric'});
   }
 
   changeDateSpan(delta: number) : void{
@@ -62,7 +66,7 @@ export class CalendarContainerComponent implements OnInit {
     //iterate backwards through zeroWeeks array to find the first positive week
     for(var i = this.zeroWeeks.length-1; i>=0; i--){
       //determine week count
-      weekCount = Math.floor(moment(this._displayService.getSelectedDay().date).diff(this.zeroWeeks[i],'days') / 7);
+      weekCount = Math.floor(moment(this._displayService.getCurrentDate()).diff(this.zeroWeeks[i],'days') / 7);
       //handle zero week
       if(weekCount>=0){ if(i%3 != 0){ weekCount++; } i = -1; }
     }

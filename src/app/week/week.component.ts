@@ -174,7 +174,7 @@ export class WeekComponent implements OnInit {
     this.selectedYear = newWeek.year();
     // if selected day is in month, that is first option
     if (this._displayService.getSelectedDay() && newWeek.isSame(moment(this._displayService.getSelectedDay()), 'week')) {
-      this._displayService.updateDayEvents(this._displayService.getSelectedDay());
+      this._displayService.updateDayEvents(this._displayService.getCurrentDate());
       this.updateWeekView();
     }
     // if current week, make selected day today

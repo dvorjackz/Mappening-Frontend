@@ -52,7 +52,7 @@ export class MonthComponent implements OnInit {
       this.selectedYear = moment().year();
       this.fillEventsByDay();
       this.ngZone.run( () => {
-        this.showCalendar(this._displayService.getSelectedDay());
+        this.showCalendar(this._displayService.getCurrentDate());
       });
       let calendarDays = this._displayService.getDays();
       let first = moment([calendarDays[0].year, calendarDays[0].month, calendarDays[0].dayOfMonth]).toDate();
@@ -67,7 +67,7 @@ export class MonthComponent implements OnInit {
       this.filteredMonthYearEvents = monthEventCollection.features;
       this.fillEventsByDay();
       this.ngZone.run( () => {
-        this.showCalendar(this._displayService.getSelectedDay());
+        this.showCalendar(this._displayService.getCurrentDate());
       });
     });
 
@@ -75,13 +75,9 @@ export class MonthComponent implements OnInit {
         this.clickedEvent = clickedEventInfo;
     });
 
-    this.fillEventsByDay();
-    if (this._displayService.getSelectedDay() != null) {
-      this.showCalendar(this._displayService.getSelectedDay());
-    }
-    else{
-      this.showCalendar(new Date());
-    }
+    this._displayService.selectedDay$.subscribe(selected => {
+        this.selectedDay = selected;
+    });
 
     let calendarDays = this._displayService.getDays();
     let first = moment([calendarDays[0].year, calendarDays[0].month, calendarDays[0].dayOfMonth]).toDate();
@@ -96,6 +92,7 @@ export class MonthComponent implements OnInit {
   }
 
   showCalendar(dateInMonth: Moment | Date | string): void {
+    console.log(dateInMonth);
     if(this._displayService.isMonthView()){
     if(dateInMonth == undefined)
       return;
@@ -125,6 +122,7 @@ export class MonthComponent implements OnInit {
       // set selected day to the date provided
       if (d.isSame(dateInMonth, 'day')) {
         // this.selectedDay = weekDay;
+          console.log(weekDay);
         this._displayService.setSelectedDay(weekDay);
       }
     }
@@ -139,9 +137,9 @@ export class MonthComponent implements OnInit {
     // 1 means advance one month, -1 means go back one month
     let newMonth: Moment = this.currentMonth.clone().add(delta, 'months');
     // if selected day is in month, that is first option
-    if (this._displayService.getSelectedDay() && newMonth.isSame(moment(this._displayService.getSelectedDay()), 'month')) {
-      this._displayService.updateDayEvents(this._displayService.getSelectedDay());
-      this.showCalendar(this._displayService.getSelectedDay());
+    if (this._displayService.getCurrentDate() && newMonth.isSame(moment(this._displayService.getCurrentDate()), 'month')) {
+      this._displayService.updateDayEvents(this._displayService.getCurrentDate());
+      this.showCalendar(this._displayService.getCurrentDate());
     }
     // if current month, make selected day today
     else if (newMonth.isSame(moment(), 'month')) {
@@ -203,17 +201,11 @@ export class MonthComponent implements OnInit {
 
   onSelect(day: CalendarDay): void {
     // this.selectedDay = day;
-      if(this._displayService.getSelectedDay() != day){
-        this.router.navigate( ['', {outlets: {sidebar: ['list']}}]);
-      }
+    if(this._displayService.getSelectedDay() != day)
+      this.router.navigate( ['', {outlets: {sidebar: ['list']}}]);
     this._displayService.setSelectedDay(day);
     let date = moment([day.year, day.month, day.dayOfMonth]).toDate();
     this._displayService.updateDayEvents(date);
-  }
-
-  public ngOnDestroy(): void {
-    ("unsubscribe");
-    this._displayService.monthEvents$.unsubscribe(); // or something similar
   }
 
 }
