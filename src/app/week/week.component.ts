@@ -262,7 +262,7 @@ export class WeekComponent implements OnInit {
     this._displayService.updateClickedEvent(event);
     //route to new event detail component
     this.router.navigate(['', {outlets: {sidebar: ['detail', event.id]}}]);
-    this._eventService.updateExpandedEvent(event);
+    this._displayService.updateExpandedEvent(event);
   }
 
   //retrieve and format event title and event time
