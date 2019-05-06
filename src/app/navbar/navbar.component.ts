@@ -11,16 +11,16 @@ import { DisplayService } from '../services/display.service';
 export class NavbarComponent implements OnInit {
     @Output() changeView: EventEmitter<string> = new EventEmitter();
 
-    isMapSelected: boolean;
+    isMapSelected: boolean = true;
 
     constructor(private _displayService: DisplayService, private _router: Router) {
-      this._displayService.currentDate$.subscribe( day => {
-        if(this._displayService.isMapView()){
+      this._displayService.currentView$.subscribe( view => {
+        if(view == 'map')
           this.isMapSelected = true;
-        } else {
+        else
           this.isMapSelected = false;
-        }
       });
+      this._displayService.isMapView();
     }
     ngOnInit() { }
 

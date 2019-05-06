@@ -36,7 +36,7 @@ export class DateSelectorComponent implements OnInit {
     }
 
     private dateToString(date: Date): string {
-        let day = moment(date).format('d');
+        let day = moment(date).format('D');
         let month = moment(date).format('MMM');
         let description = '';
         let today = new Date();

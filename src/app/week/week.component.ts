@@ -260,9 +260,9 @@ export class WeekComponent implements OnInit {
   openEvent(event: GeoJson): void{
     //update clicked event
     this._displayService.updateClickedEvent(event);
-    this._displayService.updateClickedEvent(event);
     //route to new event detail component
     this.router.navigate(['', {outlets: {sidebar: ['detail', event.id]}}]);
+    this._eventService.updateExpandedEvent(event);
   }
 
   //retrieve and format event title and event time

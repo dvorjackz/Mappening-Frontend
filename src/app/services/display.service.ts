@@ -40,6 +40,7 @@ export class DisplayService {
 
   // SOLO EVENT VARIABLES
   private _clickedEvent;              // holds the current clicked event
+  private _expandedEvent;             // hold the current sidebar event
   private _hoveredEvent;              // holds the current hovered event
 
   // FILTER STORAGE VARIABLES
@@ -66,6 +67,7 @@ export class DisplayService {
   private dayEventsSource: BehaviorSubject <FeatureCollection>;
   private filteredDayEventsSource: BehaviorSubject <FeatureCollection>;
   private clickedEventSource: Subject <GeoJson>;
+  private expandedEventSource: Subject <GeoJson>;
   private hoveredEventSource: Subject <GeoJson>;
   private categHashSource: Subject <any>;
   private buttonHashSource: Subject <any>;
@@ -73,9 +75,10 @@ export class DisplayService {
   private dateFilterSource: Subject <any>;
   private timeFilterSource: Subject <any>;
   private universalSearchSource: Subject <string>;
+  private currentViewSource: Subject <string>;
 
   // OBSERVABLES
-  currentDate$; calendarDays$; selectedDay$; dateSpan$; clickedEvent$; hoveredEvent$;
+  currentDate$; calendarDays$; selectedDay$; dateSpan$; clickedEvent$; expandedEvent$; hoveredEvent$; currentView$;
   monthEvents$; filteredMonthEvents$; weekEvents$; filteredWeekEvents$; dayEvents$; filteredDayEvents$;
   categHash$; buttonHash$; locationFilter$; dateFilter$; timeFilter$; universalSearch$;
 
@@ -133,6 +136,7 @@ export class DisplayService {
     this.dayEventsSource = new BehaviorSubject <FeatureCollection> (new FeatureCollection([]));
     this.filteredDayEventsSource = new BehaviorSubject <FeatureCollection> (new FeatureCollection([]));
     this.clickedEventSource = new Subject <GeoJson> ();
+    this.expandedEventSource = new Subject <GeoJson> ();
     this.hoveredEventSource = new Subject <GeoJson> ();
     this.categHashSource = new Subject <any> ();
     this.buttonHashSource = new Subject <any> ();
@@ -140,6 +144,7 @@ export class DisplayService {
     this.dateFilterSource = new Subject <any> ();
     this.timeFilterSource = new Subject <any> ();
     this.universalSearchSource = new Subject <string> ();
+    this.currentViewSource = new Subject <string> ();
     // Observable string streams
     this.currentDate$ = this.currentDateSource.asObservable();
     this.calendarDays$ = this.calendarDaysSource.asObservable();
@@ -152,6 +157,7 @@ export class DisplayService {
     this.dayEvents$ = this.dayEventsSource.asObservable();
     this.filteredDayEvents$ = this.filteredDayEventsSource.asObservable();
     this.clickedEvent$ = this.clickedEventSource.asObservable();
+    this.expandedEvent$ = this.expandedEventSource.asObservable();
     this.hoveredEvent$ = this.hoveredEventSource.asObservable();
     this.categHash$ = this.categHashSource.asObservable();
     this.buttonHash$ = this.buttonHashSource.asObservable();
@@ -159,6 +165,7 @@ export class DisplayService {
     this.dateFilter$ = this.dateFilterSource.asObservable();
     this.timeFilter$ = this.timeFilterSource.asObservable();
     this.universalSearch$ = this.universalSearchSource.asObservable();
+    this.currentView$ = this.currentViewSource.asObservable();
     // Maintain a set of self-subscribed local values
     this.currentDate$.subscribe(date => this._currentDate = date);
     this.calendarDays$.subscribe(days => this._calendarDays = days);
@@ -171,6 +178,7 @@ export class DisplayService {
     this.filteredWeekEvents$.subscribe(filteredWeekEvents => this._filteredWeekEvents = filteredWeekEvents);
     this.filteredDayEvents$.subscribe(filteredDayEvents => this._filteredDayEvents = filteredDayEvents);
     this.clickedEvent$.subscribe(clickedEventInfo => this._clickedEvent = clickedEventInfo);
+    this.expandedEvent$.subscribe(expandedEventInfo => this._expandedEvent = expandedEventInfo);
     this.hoveredEvent$.subscribe(hoveredEventInfo => this._hoveredEvent = hoveredEventInfo);
     this.clickedEvent$.subscribe(expandedEventInfo => this._clickedEvent = expandedEventInfo);
     this.categHash$.subscribe(categHash => { this._categHash = categHash; this.applyAllFilters(); });
@@ -179,11 +187,13 @@ export class DisplayService {
     this.dateFilter$.subscribe(dateHash => { this._dateFilter = dateHash; this.applyAllFilters(); });
     this.timeFilter$.subscribe(timeHash => { this._timeFilter = timeHash; this.applyAllFilters(); });
     this.universalSearch$.subscribe(universalSearch => { this._universalSearch = universalSearch; this.applyAllFilters(); })
+    this.currentView$.subscribe(view => this._currentView = view);
     // Populate event containers
     this.updateDayEvents(new Date());
     this.updateMonthEvents(new Date());
     this.updateWeekEvents(new Date());
     // Initialize filters to defaults
+    this.initCategories();
     this.resetFilters();
   }
 
@@ -208,7 +218,7 @@ export class DisplayService {
   // test if app is currently in map view
   isMapView() {
     if(this.router.url.startsWith("/map")){
-      this._currentView = 'map';
+      this.currentViewSource.next('map');
     }
     return this.router.url.startsWith("/map");
   }
@@ -221,7 +231,7 @@ export class DisplayService {
   // test if app is currently in month view
   isMonthView() {
     if(this.router.url.startsWith("/calendar/month")){
-      this._currentView = 'month';
+      this.currentViewSource.next('month');
     }
     return this.router.url.startsWith("/calendar/month");
   }
@@ -229,7 +239,7 @@ export class DisplayService {
   // test if app is currently in week view
   isWeekView() {
     if(this.router.url.startsWith("/calendar/week")){
-      this._currentView = 'week';
+      this.currentViewSource.next('week');
     }
     return this.router.url.startsWith("/calendar/week");
   }
@@ -274,19 +284,29 @@ export class DisplayService {
 
   // Update the current hovered event
   updateHoveredEvent(event: GeoJson): void {
-    this._hoveredEvent = event;
-    this.hoveredEventSource.next(this._hoveredEvent);
+    this.hoveredEventSource.next(event);
   }
 
   // Update the current clicked event
   updateClickedEvent(event: GeoJson): void {
-    this._clickedEvent = event;
-    this.clickedEventSource.next(this._clickedEvent);
+    this.clickedEventSource.next(event);
   }
 
   // Get the current clicked event
   getClickedEvent(){
     return this._clickedEvent;
+  }
+
+  // Update the current expanded event
+  updateExpandedEvent(event: GeoJson): void {
+    this.expandedEventSource.next(event);
+    if(this.isMapView())
+      this.boldPopup(event);
+  }
+
+  // Get the current expanded event
+  getExpandedEvent(){
+    return this._expandedEvent;
   }
 
   // advance selection to the next day
@@ -298,9 +318,12 @@ export class DisplayService {
         this.setSelectedDay(this._calendarDays[index]);
       }
     }
+    this.updateClickedEvent(null);
+    this.updateExpandedEvent(null);
     let newDate = this._currentDate;
     newDate.setDate(newDate.getDate() + days);
     this.updateDayEvents(newDate);
+    this.updateCategories();
   }
 
   // EVENT RETRIEVAL //
@@ -334,13 +357,10 @@ export class DisplayService {
   updateDayEvents(date: Date): void {
     this.currentDateSource.next(date);
     this.http.get <FeatureCollection> (this.getEventsByDate(date)).subscribe(events => {
-      console.log(events);
       this.dayEventsSource.next(events);
       if(this.isMapView()){
         this.resetFilters();
-        this.allCategories();
       }
-      this.applyAllFilters();
     });
   }
 
@@ -363,7 +383,7 @@ export class DisplayService {
   // Filter events by week
   private filterByWeek(allEvents: FeatureCollection, firstDay: Date){
     let weekEvents = new FeatureCollection([]);
-    var daysLeftInWeek = 7-parseInt(moment(firstDay).format('d'));
+    var daysLeftInWeek = 7-parseInt(moment(firstDay).format('D'));
     var lastDay = moment(firstDay).clone().add(daysLeftInWeek, 'days').toDate();
     allEvents.features.forEach(el => {
       var d = new Date(el.properties.start_time);
@@ -377,7 +397,8 @@ export class DisplayService {
 
   // reset all filters to defaults
   resetFilters(){
-    this.initCategories();
+    this.updateCategories();
+    this.allCategories();
     this.resetFilterButtons();
     this.setTimeFilter(0,1439);
     this.setLocationFilter("");
@@ -475,7 +496,7 @@ export class DisplayService {
         this._categHash[category].selected = !this._categHash[category].selected;
       }
     }
-    this.updateCategories();
+    this.categHashSource.next(this._categHash);
   }
 
   // GET categories from the server
@@ -516,7 +537,6 @@ export class DisplayService {
     });
   }
 
-  // Update category hash
   public updateCategories() {
     this.getCategories().subscribe(categs => {
       // maps store counts of events that fulfill each category
@@ -556,7 +576,7 @@ export class DisplayService {
     // iterate through events
     for (let event of featuresList) {
       let d = new Date(event.properties.start_time);
-      if(d >= moment().toDate()){
+      if(d >= moment().toDate() && event.properties.categories){
         // iterate through cartegories and increment count
         for (let category of event.properties.categories) {
           let eventCateg: string = category.toLowerCase();
@@ -603,7 +623,7 @@ export class DisplayService {
   allCategories() {
     let dayMap = this.getCategoryMap(this._dayEvents.features);
     for (var categ in this._categHash) {
-      if (this._categHash.hasOwnProperty(categ.toLowerCase()) && dayMap[categ.toLowerCase()] > 0) {
+      if (categ.toLowerCase() == 'all' || (this._categHash.hasOwnProperty(categ.toLowerCase()) && dayMap[categ.toLowerCase()] > 0)) {
         this._categHash[categ.toLowerCase()].selected = true;
       }
     }
@@ -764,7 +784,7 @@ export class DisplayService {
     //iterate through popup event titles and unbold
     var popups = document.getElementsByClassName("popupEvent");
     for(var i = 0; i < popups.length; i++){
-      if(this._clickedEvent == undefined || (this._clickedEvent != null && popups.item(i).id != "popupEvent"+this._clickedEvent.id)){
+      if(this._expandedEvent == undefined || (this._expandedEvent != null && popups.item(i).id != "popupEvent"+this._expandedEvent.id)){
         (<any>popups.item(i)).style.fontWeight = "normal";
       }
     }
@@ -778,7 +798,7 @@ export class DisplayService {
     //iterate through backup popup event titles and unbold
     var bpopups = document.getElementsByClassName("backupPopupEvent");
     for(var i = 0; i < bpopups.length; i++){
-      if(this._clickedEvent == undefined || (this._clickedEvent != null && bpopups.item(i).id != "popupEvent"+this._clickedEvent.id)){
+      if(this._expandedEvent == undefined || (this._expandedEvent != null && bpopups.item(i).id != "popupEvent"+this._expandedEvent.id)){
         (<any>bpopups.item(i)).style.fontWeight = "normal";
       }
     }

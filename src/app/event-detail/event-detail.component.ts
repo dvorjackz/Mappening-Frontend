@@ -29,7 +29,7 @@ export class EventDetailComponent implements OnInit {
   //behavior for back arrow
   back() {
     //update expanded event
-    this._displayService.boldPopup(null);
+    this._displayService.updateExpandedEvent(null);
     //weekview
     this._displayService.updateClickedEvent(null);
   }

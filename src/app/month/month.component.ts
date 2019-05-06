@@ -92,7 +92,6 @@ export class MonthComponent implements OnInit {
   }
 
   showCalendar(dateInMonth: Moment | Date | string): void {
-    console.log(dateInMonth);
     if(this._displayService.isMonthView()){
     if(dateInMonth == undefined)
       return;
@@ -122,7 +121,6 @@ export class MonthComponent implements OnInit {
       // set selected day to the date provided
       if (d.isSame(dateInMonth, 'day')) {
         // this.selectedDay = weekDay;
-          console.log(weekDay);
         this._displayService.setSelectedDay(weekDay);
       }
     }

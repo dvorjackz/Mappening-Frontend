@@ -238,7 +238,7 @@ addPinToLocation(id: string, latitude: number, longitude: number, icon: string, 
       this.selectedEvent = event;
       this.router.navigate(['', {outlets: {sidebar: ['detail', this.selectedEvent.id]}}]);
       this._displayService.updateClickedEvent(event);
-      this._displayService.boldPopup(event);
+      this._displayService.updateExpandedEvent(event);
     };
     eventPopup.onclick = openDetails;
   }
@@ -340,7 +340,7 @@ addPinToLocation(id: string, latitude: number, longitude: number, icon: string, 
       if (this.selectedEvent && this.selectedEvent.id === e.features[0].id) {
         this._displayService.updateClickedEvent(null);
         this.router.navigate(['', {outlets: {sidebar: ['list']}}]);
-        this._displayService.boldPopup(null);
+        this._displayService.updateExpandedEvent(null);
         return;
       }
       //the service then calls selectEvent
@@ -351,6 +351,7 @@ addPinToLocation(id: string, latitude: number, longitude: number, icon: string, 
       if (this.selectedEvent && this.lastClickEvent != e.originalEvent) {
         this._displayService.updateClickedEvent(null);
         this.router.navigate(['', {outlets: {sidebar: ['list']}}]);
+        this._displayService.updateExpandedEvent(null);
         this._displayService.boldPopup(null);
       }
     });

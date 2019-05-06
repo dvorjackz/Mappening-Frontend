@@ -97,7 +97,6 @@ export class CategoryBarCalendarComponent implements OnInit {
 
   toggleDropdown() {
     this.showDropdown = !this.showDropdown;
-    this._displayService.updateCategories();
   }
 
   clearCategories(): void {

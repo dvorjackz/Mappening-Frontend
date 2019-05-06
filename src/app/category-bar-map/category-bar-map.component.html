@@ -54,7 +54,7 @@
     <div *ngIf="categHash" class="categories-wrapper">
       <ul class="categories-list" role="menu">
         <li *ngFor="let categKey of objectKeys(categHash)">
-          <a *ngIf="categHash[categKey].numEventsDay != undefined && categHash[categKey].numEventsDay > 0"
+          <a *ngIf="categKey == 'all' || (categHash[categKey].numEventsDay && categHash[categKey].numEventsDay > 0)"
              [ngClass]="{'dropdown-item': true, 'selected': categHash[categKey].selected}"
              (click)="categoryClicked(categKey)">
           <div class="checkbox-container">
